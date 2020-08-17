@@ -1,0 +1,63 @@
+---
+title: "Mozambique Base Map"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(leaflet)
+library(sf)
+library(rgdal)
+```
+
+```{r}
+
+Moz_SHP_file<-list.files("~/Work/CaboDelgado_Mapping/Data/moz_adm_20190607_shp/", pattern = ".shp$",full.names=TRUE)
+
+#map the read function
+ADM0 <- read_sf(Moz_SHP_file[1]) # Mozambique Country Level
+ADM1 <- read_sf(Moz_SHP_file[2]) # Mozambique Country Level
+ADM2 <- read_sf(Moz_SHP_file[3])
+ADM3 <- read_sf(Moz_SHP_file[4])
+```
+
+
+```{r}
+
+m <- leaflet() %>% 
+  setView(lng = 35.315193, lat = -17.989612, zoom = 5)  %>% # Sets initial view to central Moz with the whole country in frame by default. 
+  addPolygons(data = ADM0,
+              color = "black", 
+              weight = 1,
+              smoothFactor = 0.5,
+              opacity = 1,
+              fillOpacity = 1,
+              fillColor = "white") %>% 
+  addPolygons(data = ADM1,
+              color = "black",
+              weight = .8,
+              smoothFactor = 0.2,
+              opacity = .8,
+              fillOpacity = 0.2,
+              fillColor = "red") %>% 
+  addPolygons(data = ADM2,
+              color = "black",
+              weight = .6,
+              smoothFactor = 0.5,
+              opacity = .6,
+              fillOpacity = 0.2,
+              fillColor = "yellow") %>%
+  addPolygons(data = ADM3,
+              color = "black",
+              weight = .4,
+              smoothFactor = 0.5,
+              opacity = .4,
+              fillOpacity = 0.2,
+              fillColor = "green") 
+  
+  
+  # m %>% addTiles()
+m
+
+```
+
