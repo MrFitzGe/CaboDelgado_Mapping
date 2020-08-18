@@ -22,38 +22,108 @@ ADM3 <- read_sf(Moz_SHP_file[4])
 ```
 
 
+```{r Additional Colors and labels}
+
+factorize_colors <- function(ADM_lvl) {
+  
+  num_color_areas <- case_when(TRUE ~ "No Matching Administration Level",
+            ADM_lvl == 0 ~ 1,
+            ADM_lvl == 1 ~ 11,
+            ADM_lvl == 2 ~ 159,
+            ADM_lvl == 3 ~ 411
+            )
+  
+  factpal <- colorFactor("viridis", num_color_areas)
+  return(factpal)
+}
+
+
+labels_ADM3 <- sprintf("<strong>%s</strong><br/>%s",
+          ADM3$ADM2_PT, ADM3$ADM3_PT
+) %>% lapply(htmltools::HTML)
+
+labels_ADM2 <- sprintf("<strong>%s</strong><br/>%s",
+          ADM2$ADM1_PT, ADM2$ADM2_PT
+) %>% lapply(htmltools::HTML)
+
+labels_ADM1 <- sprintf("<strong>%s</strong>",
+          ADM1$ADM1_PT) %>%
+  lapply(htmltools::HTML)
+```
+
+
 ```{r}
 
 m <- leaflet() %>% 
   setView(lng = 35.315193, lat = -17.989612, zoom = 5)  %>% # Sets initial view to central Moz with the whole country in frame by default. 
+  addTiles(group = "OSM") %>% 
+  addProviderTiles(providers$NASAGIBS.ViirsEarthAtNight2012, group='Night') %>%
   addPolygons(data = ADM0,
               color = "black", 
               weight = 1,
               smoothFactor = 0.5,
-              opacity = 1,
-              fillOpacity = 1,
-              fillColor = "white") %>% 
+              opacity = .8,
+              fillOpacity = .5,
+              fillColor = "white",
+              group = "ADM0 - Mozambique",
+              highlightOptions = highlightOptions(color = "white",
+                                                  weight = 2,
+                                                  bringToFront = TRUE)
+              ) %>% 
   addPolygons(data = ADM1,
               color = "black",
               weight = .8,
               smoothFactor = 0.2,
               opacity = .8,
               fillOpacity = 0.2,
-              fillColor = "red") %>% 
+              fillColor = "red",
+              group = "ADM1 - Provinces",
+              label = labels_ADM1,
+              highlightOptions = highlightOptions(color = "red",
+                                                  weight = 2,
+                                                  bringToFront = TRUE)
+              ) %>% 
   addPolygons(data = ADM2,
               color = "black",
               weight = .6,
               smoothFactor = 0.5,
               opacity = .6,
               fillOpacity = 0.2,
-              fillColor = "yellow") %>%
+              fillColor = "yellow",
+              group = "ADM2 - Districts",
+              label = labels_ADM2,
+              highlightOptions = highlightOptions(color = "yellow",
+                                                  weight = 2,
+                                                  bringToFront = TRUE)
+              ) %>%
   addPolygons(data = ADM3,
               color = "black",
               weight = .4,
               smoothFactor = 0.5,
               opacity = .4,
               fillOpacity = 0.2,
-              fillColor = "green") 
+              fillColor = "green",
+              group = "ADM3 - postos administrativos",
+              label = labels_ADM3,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal",
+                             padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto"),
+              highlightOptions = highlightOptions(color = "green",
+                                                  weight = 2,
+                                                  bringToFront = TRUE)
+              ) %>% 
+  # Layers control
+  addLayersControl(
+    overlayGroups = c("OSM",
+                      "Night",
+                      "ADM0 - Mozambique", 
+                      "ADM1 - Provinces",
+                      "ADM2 - Districts",
+                      "ADM3 - postos administrativos"),
+    options = layersControlOptions(collapsed = T)
+  )
   
   
   # m %>% addTiles()
